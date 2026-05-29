@@ -379,7 +379,7 @@ Potential improvements:
 ---
 
 
-Palguni Aashritha Reddy Solipuram
+**Palguni Aashritha Reddy Solipuram**
 
 Backend Engineer | Data Engineer | AI Engineer
 
