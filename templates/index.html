@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        h1 {
+            color: #222;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 110px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .cell {
+            width: 110px;
+            height: 110px;
+            font-size: 42px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #333;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .cell:hover {
+            background: #e8eefc;
+        }
+
+        #status {
+            margin-top: 25px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        button.reset {
+            margin-top: 25px;
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Tic Tac Toe AI</h1>
+<p>You are <b>X</b>. AI is <b>O</b>.</p>
+
+<div class="board" id="board"></div>
+
+<div id="status">Your turn</div>
+
+<button class="reset" onclick="resetGame()">Reset Game</button>
+
+<script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameOver = false;
+
+    function renderBoard() {
+        const boardDiv = document.getElementById("board");
+        boardDiv.innerHTML = "";
+
+        board.forEach((value, index) => {
+            const button = document.createElement("button");
+            button.className = "cell";
+            button.innerText = value;
+            button.onclick = () => playerMove(index);
+            boardDiv.appendChild(button);
+        });
+    }
+
+    async function playerMove(index) {
+        if (gameOver || board[index] !== "") {
+            return;
+        }
+
+        board[index] = "X";
+        renderBoard();
+
+        const response = await fetch("/api/play", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ board: board })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            document.getElementById("status").innerText = data.error;
+            return;
+        }
+
+        board = data.board;
+        document.getElementById("status").innerText = data.message;
+
+        if (data.winner) {
+            gameOver = true;
+        }
+
+        renderBoard();
+    }
+
+    async function resetGame() {
+        const response = await fetch("/api/reset", {
+            method: "POST"
+        });
+
+        const data = await response.json();
+
+        board = data.board;
+        gameOver = false;
+
+        document.getElementById("status").innerText = data.message;
+        renderBoard();
+    }
+
+    renderBoard();
+</script>
+
+</body>
+</html>
